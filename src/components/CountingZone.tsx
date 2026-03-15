@@ -5,6 +5,7 @@ interface CountingZoneProps {
   count: number;
   onIncrement: () => void;
   onDecrement: () => void;
+  onHaptic?: (type: "increment" | "decrement") => void;
 }
 
 interface RipplePoint {
@@ -13,17 +14,11 @@ interface RipplePoint {
   y: number;
 }
 
-export function CountingZone({ count, onIncrement, onDecrement }: CountingZoneProps) {
+export function CountingZone({ count, onIncrement, onDecrement, onHaptic }: CountingZoneProps) {
   const [ripples, setRipples] = useState<RipplePoint[]>([]);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
   const rippleId = useRef(0);
-
-  const triggerHaptic = useCallback((type: "heavy" | "warning") => {
-    if ("vibrate" in navigator) {
-      navigator.vibrate(type === "heavy" ? 30 : [20, 50, 20]);
-    }
-  }, []);
 
   const addRipple = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -36,14 +31,14 @@ export function CountingZone({ count, onIncrement, onDecrement }: CountingZonePr
     setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== id)), 700);
   }, []);
 
-  const handlePointerDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+  const handlePointerDown = useCallback((_e: React.TouchEvent | React.MouseEvent) => {
     isLongPress.current = false;
     longPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       onDecrement();
-      triggerHaptic("warning");
+      onHaptic?.("decrement");
     }, 500);
-  }, [onDecrement, triggerHaptic]);
+  }, [onDecrement, onHaptic]);
 
   const handlePointerUp = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     if (longPressTimer.current) {
@@ -53,9 +48,9 @@ export function CountingZone({ count, onIncrement, onDecrement }: CountingZonePr
     if (!isLongPress.current) {
       addRipple(e);
       onIncrement();
-      triggerHaptic("heavy");
+      onHaptic?.("increment");
     }
-  }, [onIncrement, triggerHaptic, addRipple]);
+  }, [onIncrement, onHaptic, addRipple]);
 
   const handlePointerLeave = useCallback(() => {
     if (longPressTimer.current) {

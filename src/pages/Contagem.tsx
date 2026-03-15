@@ -1,10 +1,12 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X } from "lucide-react";
+import { Check, X, Sun, Moon, Settings } from "lucide-react";
 import type { Categoria, SantaCeia } from "@/types/santa-ceia";
 import { CATEGORIA_LABELS, CATEGORIA_ORDER } from "@/types/santa-ceia";
 import { CountingZone } from "@/components/CountingZone";
 import { CategorySelector } from "@/components/CategorySelector";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { useAccessibilityStore } from "@/hooks/use-accessibility-store";
 
 interface ContagemProps {
   ceia: SantaCeia;
@@ -18,7 +20,10 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
   const [contagemAtual, setContagemAtual] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFinalizar, setShowFinalizar] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [undoData, setUndoData] = useState<{ cat: Categoria; count: number } | null>(null);
+
+  const { settings, update, toggleDarkMode, triggerHaptic } = useAccessibilityStore();
 
   const rodadaNumero = ceia.categorias[categoriaAtual].rodadas.length + 1;
 
@@ -35,6 +40,10 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
     setContagemAtual((p) => Math.max(0, p - 1));
   }, []);
 
+  const handleHaptic = useCallback((type: "increment" | "decrement") => {
+    triggerHaptic(type);
+  }, [triggerHaptic]);
+
   const handleFinalizarRodada = () => {
     if (contagemAtual === 0) return;
     setShowConfirm(true);
@@ -45,18 +54,17 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
     setUndoData({ cat: categoriaAtual, count: contagemAtual });
     setContagemAtual(0);
     setShowConfirm(false);
-
-    // Auto-clear undo after 5s
+    triggerHaptic("action");
     setTimeout(() => setUndoData(null), 5000);
   };
 
   const handleChangeCategoria = (cat: Categoria) => {
     if (contagemAtual > 0) {
-      // Auto-save current before switching
       onSalvarRodada(categoriaAtual, contagemAtual);
       setContagemAtual(0);
     }
     setCategoriaAtual(cat);
+    triggerHaptic("action");
   };
 
   return (
@@ -69,30 +77,44 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-5 pb-3">
-        <button onClick={onCancelar} className="p-2 rounded-xl bg-surface-active">
+        <button onClick={onCancelar} className="p-2 rounded-xl bg-surface-active" aria-label="Cancelar">
           <X className="w-5 h-5 text-foreground" />
         </button>
         <div className="text-center">
           <p className="label-caps">{CATEGORIA_LABELS[categoriaAtual]}</p>
           <p className="text-xs text-muted-foreground/60">Rodada {rodadaNumero}</p>
         </div>
-        <button
-          onClick={() => setShowFinalizar(true)}
-          className="p-2 rounded-xl bg-surface-active"
-        >
-          <Check className="w-5 h-5 text-primary" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-xl bg-surface-active"
+            aria-label={settings.darkMode ? "Modo claro" : "Modo escuro"}
+          >
+            {settings.darkMode ? (
+              <Sun className="w-5 h-5 text-amber-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-primary" />
+            )}
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 rounded-xl bg-surface-active"
+            aria-label="Configurações"
+          >
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </button>
+          <button
+            onClick={() => setShowFinalizar(true)}
+            className="p-2 rounded-xl bg-surface-active"
+            aria-label="Encerrar"
+          >
+            <Check className="w-5 h-5 text-primary" />
+          </button>
+        </div>
       </div>
 
-      {/* Category Tabs */}
-      <CategorySelector
-        categoriaAtual={categoriaAtual}
-        onChange={handleChangeCategoria}
-        rodadasPorCategoria={rodadasPorCategoria}
-      />
-
-      {/* Counting Zone */}
-      <div className="flex-1 flex flex-col justify-center px-4 py-4">
+      {/* Counting Zone — takes up most of the screen */}
+      <div className="flex-1 flex flex-col justify-center px-4 py-2">
         <AnimatePresence mode="wait">
           <motion.div
             key={categoriaAtual}
@@ -105,6 +127,7 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
               count={contagemAtual}
               onIncrement={handleIncrement}
               onDecrement={handleDecrement}
+              onHaptic={handleHaptic}
             />
           </motion.div>
         </AnimatePresence>
@@ -117,7 +140,7 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 left-4 right-4 bg-card rounded-2xl p-3 flex items-center justify-between z-20 card-surface-sm"
+            className="fixed bottom-44 left-4 right-4 bg-card rounded-2xl p-3 flex items-center justify-between z-20 card-surface-sm"
           >
             <span className="text-sm text-muted-foreground">
               {CATEGORIA_LABELS[undoData.cat]}: {undoData.count} salvo
@@ -126,8 +149,8 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
         )}
       </AnimatePresence>
 
-      {/* Footer */}
-      <div className="px-4 pb-6 pt-2">
+      {/* Footer: Save button + Category tabs at bottom */}
+      <div className="px-4 pb-2 pt-2">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleFinalizarRodada}
@@ -138,9 +161,31 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
               : "bg-secondary text-muted-foreground"
           }`}
         >
-          Finalizar Rodada #{rodadaNumero} • {contagemAtual} {contagemAtual === 1 ? "pessoa" : "pessoas"}
+          Finalizar Rodada #{rodadaNumero} • {contagemAtual}{" "}
+          {contagemAtual === 1 ? "pessoa" : "pessoas"}
         </motion.button>
       </div>
+
+      {/* Bottom Category Tabs */}
+      <div className="pb-4">
+        <CategorySelector
+          categoriaAtual={categoriaAtual}
+          onChange={handleChangeCategoria}
+          rodadasPorCategoria={rodadasPorCategoria}
+        />
+      </div>
+
+      {/* Settings Panel */}
+      <SettingsPanel
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        textSize={settings.textSize}
+        contrast={settings.contrast}
+        vibration={settings.vibration}
+        onTextSize={(v) => update("textSize", v)}
+        onContrast={(v) => update("contrast", v)}
+        onVibration={(v) => update("vibration", v)}
+      />
 
       {/* Confirm Round Modal */}
       <AnimatePresence>
@@ -159,8 +204,12 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <p className="label-caps text-center">{CATEGORIA_LABELS[categoriaAtual]} — Rodada {rodadaNumero}</p>
-              <p className="text-5xl font-extrabold text-center tabular-nums text-foreground">{contagemAtual}</p>
+              <p className="label-caps text-center">
+                {CATEGORIA_LABELS[categoriaAtual]} — Rodada {rodadaNumero}
+              </p>
+              <p className="text-5xl font-extrabold text-center tabular-nums text-foreground">
+                {contagemAtual}
+              </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowConfirm(false)}
@@ -197,7 +246,9 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h3 className="text-lg font-bold text-center text-foreground">Encerrar Santa Ceia?</h3>
+              <h3 className="text-lg font-bold text-center text-foreground">
+                Encerrar Santa Ceia?
+              </h3>
               <p className="text-sm text-center text-muted-foreground">
                 Total parcial: {ceia.totalGeral + contagemAtual} participantes
               </p>
