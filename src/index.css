@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  .dark {
     --background: 222 47% 4%;
     --foreground: 210 40% 98%;
 
@@ -46,6 +47,61 @@
     --sidebar-border: 210 40% 98% / 0.1;
     --sidebar-ring: 217 91% 60%;
   }
+
+  .light {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 14% 90%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 217 14% 85%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 217 14% 93%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 20% 11% / 0.1;
+    --input: 222 20% 11% / 0.1;
+    --ring: 217 91% 50%;
+
+    --surface: 222 20% 11% / 0.03;
+    --surface-active: 222 20% 11% / 0.06;
+
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 217 91% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 14% 93%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 222 20% 11% / 0.1;
+    --sidebar-ring: 217 91% 50%;
+  }
+
+  /* High Contrast override */
+  .high-contrast {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted-foreground: 0 0% 70%;
+    --surface: 0 0% 100% / 0.05;
+    --surface-active: 0 0% 100% / 0.08;
+  }
 }
 
 @layer base {
@@ -59,6 +115,17 @@
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     overscroll-behavior: none;
+  }
+
+  /* Text size classes */
+  .text-normal .counter-display {
+    @apply text-[clamp(5rem,15vw,8rem)];
+  }
+  .text-grande .counter-display {
+    @apply text-[clamp(6rem,20vw,10rem)];
+  }
+  .text-extra .counter-display {
+    @apply text-[clamp(7rem,25vw,12rem)];
   }
 }
 
@@ -85,7 +152,7 @@
   }
 
   .counting-zone {
-    @apply h-[60vh] w-full flex items-center justify-center select-none transition-colors duration-100;
+    @apply h-[55vh] w-full flex items-center justify-center select-none transition-colors duration-100;
   }
 
   .counting-zone:active {
