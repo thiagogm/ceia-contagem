@@ -31,7 +31,7 @@ const CATEGORY_CONFIG: Record<Categoria, { icon: string; label: string; colorCla
 
 export function CategorySelector({ categoriaAtual, onChange, rodadasPorCategoria }: CategorySelectorProps) {
   return (
-    <div className="flex gap-2 px-3 pb-2">
+    <div className="flex gap-2 px-3 pb-2" role="tablist" aria-label="Categorias">
       {CATEGORIA_ORDER.map((cat) => {
         const config = CATEGORY_CONFIG[cat];
         const isActive = cat === categoriaAtual;
@@ -40,16 +40,18 @@ export function CategorySelector({ categoriaAtual, onChange, rodadasPorCategoria
         return (
           <button
             key={cat}
+            role="tab"
             onClick={() => {
               onChange(cat);
               if ("vibrate" in navigator) navigator.vibrate(10);
             }}
             className={`
-              relative flex-1 py-3 px-2 rounded-2xl text-center transition-all duration-200 min-h-[72px]
-              border-2 
-              ${isActive ? config.activeClass : "bg-surface-active border-transparent"}
+              relative flex-1 py-3 px-2 rounded-2xl text-center transition-all duration-200 min-h-[76px]
+              border-2
+              ${isActive ? config.activeClass + " scale-[1.02]" : "bg-surface-active border-transparent active:scale-95"}
             `}
             aria-current={isActive ? "true" : undefined}
+            aria-selected={isActive}
             aria-label={`${config.label} - ${rodadas} rodadas`}
           >
             {isActive && (
