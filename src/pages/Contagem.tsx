@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, X, Sun, Moon, Settings, CheckCircle2, CloudCheck } from "lucide-react";
+import { Check, X, Sun, Moon, Settings, CheckCircle2, Cloud } from "lucide-react";
 import { toast } from "sonner";
 import type { Categoria, SantaCeia } from "@/types/santa-ceia";
 import { CATEGORIA_LABELS, CATEGORIA_ORDER } from "@/types/santa-ceia";
@@ -119,7 +119,7 @@ export function Contagem({ ceia, onSalvarRodada, onFinalizar, onCancelar }: Cont
             )}
           </AnimatePresence>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-active text-muted-foreground text-[10px] font-semibold uppercase tracking-wider">
-            <CloudCheck className="w-3 h-3" /> Auto
+            <Cloud className="w-3 h-3" /> Auto
           </div>
         </div>
         <div className="flex items-center gap-1">
