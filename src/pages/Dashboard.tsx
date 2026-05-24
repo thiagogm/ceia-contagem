@@ -1,24 +1,26 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, ChevronRight, Trash2, Clock, Users, TrendingUp, Calendar } from "lucide-react";
+import { Plus, ChevronRight, Trash2, Clock, Users, TrendingUp, Calendar, Sun, Moon, Settings } from "lucide-react";
 import type { SantaCeia } from "@/types/santa-ceia";
 import { formatarDataCurta, CATEGORIA_ORDER, CATEGORIA_LABELS } from "@/types/santa-ceia";
 
-interface DashboardProps {
-  historico: SantaCeia[];
-  onNovaCeia: (localidade: string) => void;
-  onVerRelatorio: (ceia: SantaCeia) => void;
-  onExcluir: (id: string) => void;
-}
+import { useNavigate } from "react-router-dom";
+import { useSantaCeiaStore } from "@/hooks/use-santa-ceia-store";
+import { SettingsPanel } from "@/components/SettingsPanel";
+import { useAccessibilityStore } from "@/hooks/use-accessibility-store";
 
 const CHIP_BY_CAT: Record<string, string> = {
-  enfermos: "bg-amber-400/15 text-amber-300",
-  irmas: "bg-rose-400/15 text-rose-300",
-  irmaos: "bg-sky-400/15 text-sky-300",
+  enfermos: "bg-amber-400/20 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
+  irmas: "bg-rose-400/20 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300",
+  irmaos: "bg-sky-400/20 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
 };
 
-export function Dashboard({ historico, onNovaCeia, onVerRelatorio, onExcluir }: DashboardProps) {
+export function Dashboard() {
+  const navigate = useNavigate();
+  const { historico, iniciarNovaCeia, excluirCeia } = useSantaCeiaStore();
+  const { settings, update, toggleDarkMode } = useAccessibilityStore();
   const [showModal, setShowModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [localidade, setLocalidade] = useState("");
 
   const stats = useMemo(() => {
@@ -29,9 +31,14 @@ export function Dashboard({ historico, onNovaCeia, onVerRelatorio, onExcluir }: 
   }, [historico]);
 
   const handleIniciar = () => {
-    onNovaCeia(localidade.trim() || "Congregação");
+    iniciarNovaCeia(localidade.trim() || "Congregação");
     setShowModal(false);
     setLocalidade("");
+    // Atrasar levemente a navegação para garantir que o React Context
+    // tenha tempo de propagar o ceiaAtual antes da página de contagem montar.
+    setTimeout(() => {
+      navigate("/contagem");
+    }, 10);
   };
 
   return (
@@ -42,121 +49,170 @@ export function Dashboard({ historico, onNovaCeia, onVerRelatorio, onExcluir }: 
       exit={{ opacity: 0 }}
     >
       {/* Header */}
-      <header className="px-5 pt-8 pb-3 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center text-xl" aria-hidden>🍷</div>
-        <div>
-          <h1 className="text-2xl font-extrabold text-foreground font-display tracking-tight leading-none">Santa Ceia</h1>
-          <p className="text-xs text-muted-foreground mt-1">Contador oficial por rodada</p>
+      <header className="px-5 pt-8 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center text-xl" aria-hidden>🍷</div>
+          <div>
+            <h1 className="text-2xl font-extrabold text-foreground font-display tracking-tight leading-none">Santa Ceia</h1>
+            <p className="text-xs text-muted-foreground mt-1">Contador oficial</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-xl bg-surface-active"
+            aria-label={settings.darkMode ? "Modo claro" : "Modo escuro"}
+          >
+            {settings.darkMode ? (
+              <Sun className="w-5 h-5 text-amber-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-foreground" />
+            )}
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 rounded-xl bg-surface-active"
+            aria-label="Configurações"
+          >
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </button>
         </div>
       </header>
 
       {/* Bento overview */}
       {historico.length > 0 && (
-        <section className="px-3 pb-3 grid grid-cols-4 gap-2" aria-label="Visão geral">
-          <div className="bento-tile-primary col-span-2 row-span-2 flex flex-col justify-between min-h-[140px]">
-            <div className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 opacity-80" />
-              <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Total Acumulado</p>
+        <section className="px-4 pb-4 grid grid-cols-2 gap-3" aria-label="Visão geral">
+          {/* Total */}
+          <div className="col-span-2 rounded-[1.5rem] bg-gradient-to-br from-primary to-blue-600 p-5 text-primary-foreground shadow-lg shadow-primary/25 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+              <Users className="w-24 h-24" />
             </div>
-            <p className="text-5xl font-extrabold tabular-nums font-display tracking-tighter leading-none">
-              {stats.totalParticipantes}
-            </p>
-            <p className="text-xs opacity-80">em {stats.totalCeias} {stats.totalCeias === 1 ? "ceia" : "ceias"}</p>
+            <div className="relative z-10 flex flex-col gap-4">
+              <div className="flex items-center gap-2 opacity-90">
+                <div className="p-1.5 rounded-lg bg-white/20 backdrop-blur-md">
+                  <Users className="w-4 h-4" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest">Total de Participantes</p>
+              </div>
+              <div>
+                <p className="text-6xl font-extrabold tabular-nums font-display tracking-tighter leading-none">
+                  {stats.totalParticipantes}
+                </p>
+                <p className="text-sm opacity-80 mt-1 font-medium">Acumulado em {stats.totalCeias} {stats.totalCeias === 1 ? "ceia" : "ceias"}</p>
+              </div>
+            </div>
           </div>
-          <div className="bento-tile col-span-2 py-3">
+          
+          {/* Media */}
+          <div className="rounded-[1.25rem] bg-amber-50 dark:bg-amber-500/10 p-4 border border-amber-100 dark:border-amber-500/20 flex flex-col justify-between min-h-[110px]">
             <div className="flex items-center gap-1.5">
-              <TrendingUp className="w-3 h-3 text-muted-foreground" />
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Média</p>
+              <div className="p-1 rounded-md bg-amber-200 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
+                <TrendingUp className="w-3.5 h-3.5" />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">Média</p>
             </div>
-            <p className="text-2xl font-extrabold tabular-nums font-display text-foreground leading-tight mt-1">
-              {stats.media}
-            </p>
-            <p className="text-[10px] text-muted-foreground">por ceia</p>
+            <div>
+              <p className="text-3xl font-extrabold tabular-nums font-display text-amber-950 dark:text-amber-100 leading-tight">
+                {stats.media}
+              </p>
+              <p className="text-[11px] text-amber-700/80 dark:text-amber-300/80 font-medium">por ceia</p>
+            </div>
           </div>
-          <div className="bento-tile col-span-2 py-3">
+
+          {/* Ultima */}
+          <div className="rounded-[1.25rem] bg-emerald-50 dark:bg-emerald-500/10 p-4 border border-emerald-100 dark:border-emerald-500/20 flex flex-col justify-between min-h-[110px]">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-3 h-3 text-muted-foreground" />
-              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Última</p>
+              <div className="p-1 rounded-md bg-emerald-200 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                <Calendar className="w-3.5 h-3.5" />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">Última Ceia</p>
             </div>
-            <p className="text-2xl font-extrabold tabular-nums font-display text-foreground leading-tight mt-1">
-              {stats.ultimaCeia?.totalGeral ?? 0}
-            </p>
-            <p className="text-[10px] text-muted-foreground truncate">
-              {stats.ultimaCeia ? formatarDataCurta(stats.ultimaCeia.data) : "—"}
-            </p>
+            <div>
+              <p className="text-3xl font-extrabold tabular-nums font-display text-emerald-950 dark:text-emerald-100 leading-tight">
+                {stats.ultimaCeia?.totalGeral ?? 0}
+              </p>
+              <p className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80 font-medium truncate">
+                {stats.ultimaCeia ? formatarDataCurta(stats.ultimaCeia.data) : "—"}
+              </p>
+            </div>
           </div>
         </section>
       )}
 
       {/* History */}
-      <div className="flex-1 overflow-y-auto px-3 pb-32">
+      <div className="flex-1 overflow-y-auto px-4 pb-32">
         {historico.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-12 text-center px-6">
-            <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-4xl mb-4">
+            <div className="w-24 h-24 rounded-[2rem] bg-primary/10 flex items-center justify-center text-5xl mb-6 shadow-inner">
               🍷
             </div>
-            <h2 className="text-lg font-bold text-foreground font-display">Bem-vindo</h2>
-            <p className="text-sm text-muted-foreground mt-1 max-w-[260px]">
-              Toque em <strong className="text-primary">Nova Santa Ceia</strong> para começar a contagem por rodada.
+            <h2 className="text-xl font-extrabold text-foreground font-display">Bem-vindo</h2>
+            <p className="text-sm text-muted-foreground mt-2 max-w-[260px] leading-relaxed">
+              Toque em <strong className="text-primary font-bold">Nova Santa Ceia</strong> para começar a primeira contagem.
             </p>
-            <div className="mt-6 grid grid-cols-3 gap-2 w-full max-w-xs">
+            <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-xs">
               {[
-                { i: "♿", l: "Enfermos" },
-                { i: "👩", l: "Irmãs" },
-                { i: "👨", l: "Irmãos" },
+                { i: "♿", l: "Enfermos", color: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" },
+                { i: "👩", l: "Irmãs", color: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400" },
+                { i: "👨", l: "Irmãos", color: "bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-400" },
               ].map((c) => (
-                <div key={c.l} className="bento-tile py-3 text-center">
-                  <div className="text-2xl">{c.i}</div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-1">{c.l}</p>
+                <div key={c.l} className="flex flex-col items-center gap-2">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${c.color}`}>
+                    {c.i}
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{c.l}</p>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 px-2 pt-1 pb-2">
-              <Clock className="w-3 h-3 text-muted-foreground" />
-              <p className="label-caps text-xs">Histórico</p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1 pt-2 pb-1">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <h3 className="text-sm font-bold text-foreground tracking-wide">Histórico Recente</h3>
             </div>
             {historico.map((ceia) => (
               <motion.div
                 key={ceia.id}
                 layout
-                className="bento-tile p-3 flex items-center gap-3"
+                className="bg-card dark:bg-surface rounded-2xl p-4 border border-border/50 shadow-sm flex items-center gap-3 relative overflow-hidden transition-colors"
               >
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/20" />
                 <button
-                  onClick={() => onVerRelatorio(ceia)}
+                  onClick={() => navigate(`/relatorio/${ceia.id}`)}
                   className="flex-1 text-left"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold text-foreground">{ceia.localidade}</p>
-                      <p className="text-[11px] text-muted-foreground">{formatarDataCurta(ceia.data)}</p>
+                      <p className="text-base font-bold text-foreground">{ceia.localidade}</p>
+                      <p className="text-xs text-muted-foreground font-medium mt-0.5">{formatarDataCurta(ceia.data)}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-extrabold tabular-nums text-foreground font-display">{ceia.totalGeral}</span>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-2xl font-extrabold tabular-nums text-foreground font-display tracking-tight">{ceia.totalGeral}</span>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground/60" />
                     </div>
                   </div>
-                  <div className="flex gap-1.5 mt-2 flex-wrap">
+                  <div className="flex gap-2 mt-3 flex-wrap">
                     {CATEGORIA_ORDER.map((cat) => {
                       const t = ceia.categorias[cat].total;
                       if (t === 0) return null;
                       return (
-                        <span key={cat} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${CHIP_BY_CAT[cat]}`}>
+                        <span key={cat} className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg ${CHIP_BY_CAT[cat]}`}>
                           {CATEGORIA_LABELS[cat]}: {t}
                         </span>
                       );
                     })}
                   </div>
                 </button>
-                <button
-                  onClick={() => onExcluir(ceia.id)}
-                  className="p-2 rounded-xl text-muted-foreground/40 hover:text-destructive transition-colors"
-                  aria-label="Excluir registro"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="pl-2 border-l border-border/50">
+                  <button
+                    onClick={() => excluirCeia(ceia.id)}
+                    className="p-2 rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    aria-label="Excluir registro"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -179,21 +235,24 @@ export function Dashboard({ historico, onNovaCeia, onVerRelatorio, onExcluir }: 
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[8dvh] bg-background/80 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowModal(false)}
           >
-            <motion.div
-              className="w-full max-w-md bg-card rounded-t-3xl p-6 pb-8 space-y-4"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            <motion.form
+              className="w-full max-w-md bg-card p-6 rounded-3xl shadow-2xl space-y-4 border border-border/40"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
               onClick={(e) => e.stopPropagation()}
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleIniciar();
+              }}
             >
-              <div className="w-10 h-1 rounded-full bg-muted mx-auto mb-2" />
               <h2 className="text-xl font-extrabold text-foreground font-display">Nova Contagem</h2>
               <p className="text-sm text-muted-foreground -mt-2">Identifique a congregação para o relatório.</p>
               <div>
@@ -202,21 +261,40 @@ export function Dashboard({ historico, onNovaCeia, onVerRelatorio, onExcluir }: 
                   type="text"
                   value={localidade}
                   onChange={(e) => setLocalidade(e.target.value)}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   placeholder="Ex: Itaquera, Brás..."
                   className="w-full bg-accent rounded-xl px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   autoFocus
                 />
               </div>
               <button
-                onClick={handleIniciar}
+                type="submit"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  handleIniciar();
+                }}
                 className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/30"
               >
                 Iniciar Contagem →
               </button>
-            </motion.div>
+            </motion.form>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Settings Panel */}
+      <SettingsPanel
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        textSize={settings.textSize}
+        contrast={settings.contrast}
+        vibration={settings.vibration}
+        onTextSize={(v) => update("textSize", v)}
+        onContrast={(v) => update("contrast", v)}
+        onVibration={(v) => update("vibration", v)}
+      />
     </motion.div>
   );
 }

@@ -26,13 +26,11 @@ export function CountingZone({ count, onIncrement, onDecrement, onHaptic }: Coun
   const [ripples, setRipples] = useState<RipplePoint[]>([]);
   const [floats, setFloats] = useState<FloatLabel[]>([]);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const isLongPress = useRef(false);
   const rippleId = useRef(0);
 
-  const addRipple = useCallback((e: React.TouchEvent | React.MouseEvent, kind: "plus" | "minus") => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+  const addRipple = useCallback((clientX: number, clientY: number, rect: DOMRect, kind: "plus" | "minus") => {
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     const id = ++rippleId.current;
@@ -42,43 +40,60 @@ export function CountingZone({ count, onIncrement, onDecrement, onHaptic }: Coun
     setTimeout(() => setFloats((prev) => prev.filter((f) => f.id !== id)), 800);
   }, []);
 
-  const handlePointerDown = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    isLongPress.current = false;
-    longPressTimer.current = setTimeout(() => {
-      isLongPress.current = true;
-      onDecrement();
-      onHaptic?.("decrement");
-      addRipple(e, "minus");
-    }, 500);
-  }, [onDecrement, onHaptic, addRipple]);
-
-  const handlePointerUp = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+  const clearTimers = useCallback(() => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-    if (!isLongPress.current) {
-      addRipple(e, "plus");
-      onIncrement();
-      onHaptic?.("increment");
-    }
-  }, [onIncrement, onHaptic, addRipple]);
-
-  const handlePointerLeave = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
+    if (intervalTimer.current) {
+      clearInterval(intervalTimer.current);
+      intervalTimer.current = null;
     }
   }, []);
 
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isLongPress.current = false;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const { clientX, clientY } = e;
+
+    longPressTimer.current = setTimeout(() => {
+      isLongPress.current = true;
+      // First decrement
+      onDecrement();
+      onHaptic?.("decrement");
+      addRipple(clientX, clientY, rect, "minus");
+
+      // Auto-decrement loop
+      intervalTimer.current = setInterval(() => {
+        onDecrement();
+        onHaptic?.("decrement");
+        addRipple(clientX, clientY, rect, "minus");
+      }, 800); // 800ms between decrements for better control
+    }, 700); // 700ms to trigger long press
+  }, [onDecrement, onHaptic, addRipple]);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    clearTimers();
+    if (!isLongPress.current) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const { clientX, clientY } = e;
+      addRipple(clientX, clientY, rect, "plus");
+      onIncrement();
+      onHaptic?.("increment");
+    }
+  }, [onIncrement, onHaptic, addRipple, clearTimers]);
+
+  const handlePointerLeave = useCallback(() => {
+    clearTimers();
+  }, [clearTimers]);
+
   return (
     <motion.div
-      className="counting-zone relative overflow-hidden cursor-pointer rounded-3xl flex-1"
-      onTouchStart={handlePointerDown}
-      onTouchEnd={handlePointerUp}
-      onMouseDown={handlePointerDown}
-      onMouseUp={handlePointerUp}
-      onMouseLeave={handlePointerLeave}
+      className="counting-zone relative overflow-hidden cursor-pointer rounded-3xl flex-1 select-none touch-manipulation"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
+      onPointerCancel={handlePointerLeave}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.1 }}
       role="button"
@@ -113,22 +128,24 @@ export function CountingZone({ count, onIncrement, onDecrement, onHaptic }: Coun
         ))}
       </AnimatePresence>
 
-      {/* Counter */}
-      <AnimatePresence mode="popLayout">
-        <motion.span
-          key={count}
-          className="counter-display text-foreground"
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-          transition={{ duration: 0.15 }}
-        >
-          {count}
-        </motion.span>
-      </AnimatePresence>
+      {/* Counter — centered in available space */}
+      <div className="flex-1 flex items-center justify-center min-h-0">
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={count}
+            className="counter-display text-foreground"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+          >
+            {count}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Hint */}
-      <div className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-1 px-4">
+      <div className="flex-shrink-0 pb-3 flex flex-col items-center gap-1 px-4">
         <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="w-5 h-5 rounded-md bg-primary/15 flex items-center justify-center text-primary">

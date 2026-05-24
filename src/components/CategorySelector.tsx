@@ -12,20 +12,20 @@ const CATEGORY_CONFIG: Record<Categoria, { icon: string; label: string; colorCla
   enfermos: {
     icon: "♿",
     label: "Enfermos",
-    colorClass: "text-amber-400",
-    activeClass: "bg-amber-400/15 border-amber-400/40",
+    colorClass: "text-amber-600 dark:text-amber-400",
+    activeClass: "bg-amber-400/20 dark:bg-amber-400/15 border-amber-400/40",
   },
   irmas: {
     icon: "👩",
     label: "Irmãs",
-    colorClass: "text-rose-400",
-    activeClass: "bg-rose-400/15 border-rose-400/40",
+    colorClass: "text-rose-600 dark:text-rose-400",
+    activeClass: "bg-rose-400/20 dark:bg-rose-400/15 border-rose-400/40",
   },
   irmaos: {
     icon: "👨",
     label: "Irmãos",
-    colorClass: "text-sky-400",
-    activeClass: "bg-sky-400/15 border-sky-400/40",
+    colorClass: "text-sky-600 dark:text-sky-400",
+    activeClass: "bg-sky-400/20 dark:bg-sky-400/15 border-sky-400/40",
   },
 };
 

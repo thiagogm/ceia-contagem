@@ -5,27 +5,27 @@
 @layer base {
   :root,
   .dark {
-    /* Navy Trust — dark */
-    --background: 225 60% 7%;
-    --foreground: 213 27% 95%;
+    /* CCB — dark */
+    --background: 219 68% 15%;
+    --foreground: 210 17% 98%;
 
-    --card: 222 50% 11%;
-    --card-foreground: 213 27% 95%;
+    --card: 219 68% 12%;
+    --card-foreground: 210 17% 98%;
 
-    --popover: 222 50% 11%;
-    --popover-foreground: 213 27% 95%;
+    --popover: 219 68% 12%;
+    --popover-foreground: 210 17% 98%;
 
-    --primary: 209 70% 58%;
-    --primary-foreground: 225 60% 8%;
+    --primary: 203 94% 45%;
+    --primary-foreground: 210 17% 98%;
 
-    --secondary: 222 35% 18%;
-    --secondary-foreground: 213 27% 95%;
+    --secondary: 219 50% 25%;
+    --secondary-foreground: 210 17% 98%;
 
-    --muted: 222 30% 22%;
-    --muted-foreground: 213 20% 70%;
+    --muted: 219 50% 25%;
+    --muted-foreground: 219 21% 80%;
 
-    --accent: 212 51% 28%;
-    --accent-foreground: 213 27% 95%;
+    --accent: 203 94% 45%;
+    --accent-foreground: 210 17% 98%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 213 27% 98%;
@@ -33,52 +33,52 @@
     --success: 152 60% 45%;
     --success-foreground: 213 27% 98%;
 
-    --border: 213 27% 95% / 0.1;
-    --input: 213 27% 95% / 0.1;
-    --ring: 209 70% 58%;
+    --border: 219 50% 25%;
+    --input: 219 50% 25%;
+    --ring: 203 94% 45%;
 
     --radius: 1rem;
 
-    --surface: 213 27% 95% / 0.04;
-    --surface-active: 213 27% 95% / 0.08;
+    --surface: 210 17% 98% / 0.04;
+    --surface-active: 210 17% 98% / 0.08;
 
-    --gradient-primary: linear-gradient(135deg, hsl(209 70% 58%), hsl(212 51% 35%));
-    --gradient-card: linear-gradient(160deg, hsl(222 50% 13%), hsl(225 60% 8%));
-    --shadow-elevated: 0 12px 32px -8px hsl(225 60% 3% / 0.6);
-    --shadow-glow: 0 0 32px hsl(209 70% 58% / 0.25);
+    --gradient-primary: linear-gradient(135deg, hsl(203 94% 45%), hsl(203 94% 35%));
+    --gradient-card: linear-gradient(160deg, hsl(219 68% 15%), hsl(219 68% 10%));
+    --shadow-elevated: 0 12px 32px -8px hsl(219 68% 5% / 0.6);
+    --shadow-glow: 0 0 32px hsl(203 94% 45% / 0.15);
 
-    --sidebar-background: 222 47% 4%;
-    --sidebar-foreground: 213 27% 95%;
-    --sidebar-primary: 209 70% 58%;
-    --sidebar-primary-foreground: 225 60% 8%;
-    --sidebar-accent: 222 35% 18%;
-    --sidebar-accent-foreground: 213 27% 95%;
-    --sidebar-border: 213 27% 95% / 0.1;
-    --sidebar-ring: 209 70% 58%;
+    --sidebar-background: 219 68% 12%;
+    --sidebar-foreground: 210 17% 98%;
+    --sidebar-primary: 203 94% 45%;
+    --sidebar-primary-foreground: 210 17% 98%;
+    --sidebar-accent: 219 50% 25%;
+    --sidebar-accent-foreground: 210 17% 98%;
+    --sidebar-border: 219 50% 25%;
+    --sidebar-ring: 203 94% 45%;
   }
 
   .light {
-    /* Navy Trust — light */
-    --background: 220 38% 97%;
-    --foreground: 225 60% 12%;
+    /* CCB — light */
+    --background: 210 17% 98%;
+    --foreground: 210 11% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 225 60% 12%;
+    --card-foreground: 210 11% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 225 60% 12%;
+    --popover-foreground: 210 11% 15%;
 
-    --primary: 212 51% 25%;
-    --primary-foreground: 213 27% 98%;
+    --primary: 203 94% 19%;
+    --primary-foreground: 210 17% 98%;
 
-    --secondary: 213 30% 92%;
-    --secondary-foreground: 225 60% 12%;
+    --secondary: 219 21% 86%;
+    --secondary-foreground: 210 11% 15%;
 
-    --muted: 213 25% 88%;
-    --muted-foreground: 222 20% 38%;
+    --muted: 219 21% 86%;
+    --muted-foreground: 210 11% 40%;
 
-    --accent: 213 30% 94%;
-    --accent-foreground: 225 60% 12%;
+    --accent: 219 21% 86%;
+    --accent-foreground: 203 94% 19%;
 
     --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
@@ -86,41 +86,79 @@
     --success: 152 60% 38%;
     --success-foreground: 0 0% 100%;
 
-    --border: 225 60% 12% / 0.1;
-    --input: 225 60% 12% / 0.1;
-    --ring: 212 51% 25%;
+    --border: 219 21% 86%;
+    --input: 219 21% 86%;
+    --ring: 203 94% 19%;
 
-    --surface: 225 60% 12% / 0.03;
-    --surface-active: 225 60% 12% / 0.06;
+    --surface: 210 11% 15% / 0.03;
+    --surface-active: 210 11% 15% / 0.06;
 
-    --gradient-primary: linear-gradient(135deg, hsl(212 51% 25%), hsl(209 46% 43%));
-    --gradient-card: linear-gradient(160deg, hsl(0 0% 100%), hsl(220 38% 95%));
-    --shadow-elevated: 0 12px 32px -10px hsl(225 60% 12% / 0.18);
-    --shadow-glow: 0 0 24px hsl(212 51% 25% / 0.18);
+    --gradient-primary: linear-gradient(135deg, hsl(203 94% 19%), hsl(203 94% 12%));
+    --gradient-card: linear-gradient(160deg, hsl(0 0% 100%), hsl(210 17% 95%));
+    --shadow-elevated: 0 12px 32px -10px hsl(210 11% 15% / 0.1);
+    --shadow-glow: 0 0 24px hsl(203 94% 19% / 0.1);
 
-    --sidebar-background: 210 20% 98%;
-    --sidebar-foreground: 225 60% 12%;
-    --sidebar-primary: 212 51% 25%;
-    --sidebar-primary-foreground: 213 27% 98%;
-    --sidebar-accent: 213 30% 94%;
-    --sidebar-accent-foreground: 225 60% 12%;
-    --sidebar-border: 225 60% 12% / 0.1;
-    --sidebar-ring: 212 51% 25%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 210 11% 15%;
+    --sidebar-primary: 203 94% 19%;
+    --sidebar-primary-foreground: 210 17% 98%;
+    --sidebar-accent: 219 21% 86%;
+    --sidebar-accent-foreground: 210 11% 15%;
+    --sidebar-border: 219 21% 86%;
+    --sidebar-ring: 203 94% 19%;
   }
 
   /* High Contrast override */
-  .high-contrast {
+  .dark.high-contrast {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
-    --card: 0 0% 5%;
+    --card: 0 0% 0%;
     --card-foreground: 0 0% 100%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
-    --muted-foreground: 0 0% 70%;
-    --surface: 0 0% 100% / 0.05;
-    --surface-active: 0 0% 100% / 0.08;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
     --primary: 48 100% 60%;
     --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 80%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 100%;
+    --border: 0 0% 100%;
+    --ring: 48 100% 60%;
+    
+    --gradient-primary: hsl(48 100% 60%);
+    --gradient-card: hsl(0 0% 0%);
+    --shadow-elevated: 0 0 0 2px hsl(0 0% 100%);
+    --shadow-glow: none;
+    --surface: 0 0% 100% / 0.15;
+    --surface-active: 0 0% 100% / 0.25;
+  }
+
+  .light.high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 240 100% 25%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 20%;
+    --accent: 0 0% 90%;
+    --accent-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --ring: 240 100% 25%;
+    
+    --gradient-primary: hsl(240 100% 25%);
+    --gradient-card: hsl(0 0% 100%);
+    --shadow-elevated: 0 0 0 3px hsl(0 0% 0%);
+    --shadow-glow: none;
+    --surface: 0 0% 0% / 0.08;
+    --surface-active: 0 0% 0% / 0.15;
   }
 }
 
@@ -143,22 +181,26 @@
   }
 
   /* Text size classes */
-  .text-normal .counter-display {
-    @apply text-[clamp(5rem,15vw,8rem)];
+  html.text-normal {
+    font-size: 16px;
   }
-  .text-grande .counter-display {
-    @apply text-[clamp(6rem,20vw,10rem)];
+  html.text-grande {
+    font-size: 18px;
   }
-  .text-extra .counter-display {
-    @apply text-[clamp(7rem,25vw,12rem)];
+  html.text-extra {
+    font-size: 20px;
   }
+
+  /* Counter display uses fixed px so it does NOT double-scale with html font-size.
+     The text-size setting already grows all surrounding UI (labels, buttons, etc). */
+  .counter-display { font-size: clamp(72px, 15vw, 120px); }
 }
 
 @layer components {
   .counter-display {
     font-family: "Sora", ui-sans-serif, system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
-    @apply text-[clamp(5rem,15vw,8rem)] font-extrabold tracking-tighter leading-none;
+    @apply block text-center w-full font-extrabold tracking-tighter leading-none select-none;
   }
 
   .label-caps {
@@ -190,7 +232,7 @@
   }
 
   .counting-zone {
-    @apply h-[42vh] min-h-[280px] w-full flex items-center justify-center select-none transition-colors duration-100;
+    @apply w-full flex flex-col items-center justify-center select-none transition-colors duration-100;
   }
 
   .counting-zone:active {

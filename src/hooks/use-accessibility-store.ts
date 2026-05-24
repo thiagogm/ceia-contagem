@@ -15,7 +15,7 @@ const DEFAULTS: AccessibilitySettings = {
   textSize: "normal",
   contrast: "padrao",
   vibration: true,
-  darkMode: true,
+  darkMode: false,
 };
 
 function load(): AccessibilitySettings {

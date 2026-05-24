@@ -5,37 +5,40 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    hmr: {
-      overlay: false,
-    },
-  },
-  plugins: [
-    react(),
-    mode === "development" && componentTagger(),
-    VitePWA({
-      registerType: "autoUpdate",
-      devOptions: { enabled: false },
-      includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"],
-      manifest: {
-        name: "Santa Ceia — Contador",
-        short_name: "Santa Ceia",
-        description: "Contador de participantes da Santa Ceia por rodada.",
-        theme_color: "#0f1b3d",
-        background_color: "#0a1228",
-        display: "standalone",
-        orientation: "portrait",
-        start_url: "/",
-        scope: "/",
-        lang: "pt-BR",
-        icons: [
-          { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-          { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-        ],
+export default defineConfig(({ mode }) => {
+  const base = mode === "production" ? "/ceia-contagem/" : "/";
+  return {
+    base,
+    server: {
+      host: "::",
+      port: 8080,
+      hmr: {
+        overlay: false,
       },
+    },
+    plugins: [
+      react(),
+      mode === "development" && componentTagger(),
+      VitePWA({
+        registerType: "autoUpdate",
+        devOptions: { enabled: false },
+        includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"],
+        manifest: {
+          name: "Santa Ceia — Contador",
+          short_name: "Santa Ceia",
+          description: "Contador de participantes da Santa Ceia por rodada.",
+          theme_color: "#0f1b3d",
+          background_color: "#0a1228",
+          display: "standalone",
+          orientation: "portrait",
+          start_url: base,
+          scope: base,
+          lang: "pt-BR",
+          icons: [
+            { src: "icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+            { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+          ],
+        },
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
         runtimeCaching: [
@@ -61,4 +64,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-}));
+  };
+});

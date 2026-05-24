@@ -19,6 +19,13 @@ export interface CategoriaData {
   total: number;
 }
 
+export interface Oficiantes {
+  anciaes: string[];
+  cooperadores: string[];
+  cooperadoresJovens: string[];
+  diaconos: string[];
+}
+
 export interface SantaCeia {
   id: string;
   data: string; // ISO date
@@ -27,11 +34,12 @@ export interface SantaCeia {
   totalGeral: number;
   finalizada: boolean;
   criadaEm: string;
+  oficiantes?: Oficiantes;
 }
 
 export function criarSantaCeiaVazia(localidade: string): SantaCeia {
   return {
-    id: crypto.randomUUID(),
+    id: Date.now().toString() + Math.random().toString(36).substring(2),
     data: new Date().toISOString(),
     localidade,
     categorias: {
@@ -42,6 +50,12 @@ export function criarSantaCeiaVazia(localidade: string): SantaCeia {
     totalGeral: 0,
     finalizada: false,
     criadaEm: new Date().toISOString(),
+    oficiantes: {
+      anciaes: [],
+      cooperadores: [],
+      cooperadoresJovens: [],
+      diaconos: [],
+    },
   };
 }
 
@@ -66,27 +80,41 @@ export function formatarDataCurta(iso: string): string {
 export function gerarRelatorioTexto(ceia: SantaCeia): string {
   const data = formatarData(ceia.data);
   const lines: string[] = [
-    `📋 *Relatório Santa Ceia — ${ceia.localidade}*`,
-    `📅 _${data}_`,
+    `*Relatório Santa Ceia - ${ceia.localidade}*`,
+    `_${data}_`,
     "",
   ];
+
+  if (ceia.oficiantes) {
+    const formatNames = (label: string, names: string[]) => {
+      if (names.length === 0) return null;
+      if (names.length === 1) return `*${label}:* ${names[0]}`;
+      return `*${label}s:* ${names.join(", ")}`;
+    };
+
+    const ofs = [
+      formatNames("Ancião", ceia.oficiantes.anciaes),
+      formatNames("Cooperador do Ofício", ceia.oficiantes.cooperadores),
+      formatNames("Cooperador de Jovens", ceia.oficiantes.cooperadoresJovens),
+      formatNames("Diácono", ceia.oficiantes.diaconos),
+    ].filter(Boolean);
+
+    if (ofs.length > 0) {
+      lines.push(...(ofs as string[]));
+      lines.push("");
+    }
+  }
 
   for (const cat of CATEGORIA_ORDER) {
     const label = CATEGORIA_LABELS[cat];
     const catData = ceia.categorias[cat];
     if (catData.rodadas.length > 0) {
-      lines.push(`• *${label}:* ${catData.total} (${catData.rodadas.length} rodada${catData.rodadas.length > 1 ? "s" : ""})`);
+      lines.push(`- *${label}:* ${catData.total}`);
     }
   }
 
   lines.push("");
   lines.push(`*Total: ${ceia.totalGeral} participantes.*`);
-
-  const totalRodadas = CATEGORIA_ORDER.reduce((s, c) => s + ceia.categorias[c].rodadas.length, 0);
-  if (totalRodadas > 0) {
-    const media = (ceia.totalGeral / totalRodadas).toFixed(1);
-    lines.push(`_Média: ${media} por rodada._`);
-  }
 
   return lines.join("\n");
 }
