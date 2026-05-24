@@ -18,11 +18,12 @@ const App = () => (
       <Sonner />
       <SantaCeiaProvider>
         <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
+          basename={import.meta.env.BASE_URL}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/contagem" element={<Contagem />} />
