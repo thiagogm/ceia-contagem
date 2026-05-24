@@ -225,9 +225,17 @@ export function SettingsPanel({
             </div>
 
             {/* Version Footer */}
-            <div className="text-center pt-2 flex flex-col items-center justify-center text-[10px] text-muted-foreground/60 font-semibold tracking-wide flex-shrink-0">
-              <p>Santa Ceia Contador • Versão 1.2.0</p>
-              <p className="mt-0.5 opacity-80">Desenvolvido com dedicação para a CCB</p>
+            <div className="text-center pt-2 flex flex-col items-center justify-center text-[10px] text-muted-foreground/60 font-semibold tracking-wide flex-shrink-0 space-y-2">
+              <img
+                src={`${import.meta.env.BASE_URL}ccb-logo.png`}
+                alt="CCB Logo"
+                className="w-10 h-10 object-contain opacity-40 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen dark:invert transition-all"
+                aria-hidden
+              />
+              <div>
+                <p>Santa Ceia Contador • Versão 1.2.0</p>
+                <p className="mt-0.5 opacity-80">Desenvolvido com dedicação para a CCB</p>
+              </div>
             </div>
           </motion.div>
         </motion.div>
