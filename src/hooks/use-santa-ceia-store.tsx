@@ -46,6 +46,8 @@ interface SantaCeiaContextType {
   excluirCeia: (id: string) => void;
   atualizarOficiantes: (id: string, of: Partial<import("@/types/santa-ceia").Oficiantes>) => void;
   atualizarContagemRodada: (ceiaId: string, categoria: Categoria, rodadaId: string, novaContagem: number) => void;
+  restaurarHistorico: (novoHistorico: SantaCeia[]) => void;
+  limparHistorico: () => void;
 }
 
 const SantaCeiaContext = createContext<SantaCeiaContextType | null>(null);
@@ -168,6 +170,14 @@ export function SantaCeiaProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const restaurarHistorico = useCallback((novoHistorico: SantaCeia[]) => {
+    setHistorico(novoHistorico);
+  }, []);
+
+  const limparHistorico = useCallback(() => {
+    setHistorico([]);
+  }, []);
+
   const value = {
     historico,
     ceiaAtual,
@@ -179,6 +189,8 @@ export function SantaCeiaProvider({ children }: { children: React.ReactNode }) {
     excluirCeia,
     atualizarOficiantes,
     atualizarContagemRodada,
+    restaurarHistorico,
+    limparHistorico,
   };
 
   return (
