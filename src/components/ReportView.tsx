@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
-import { Share2, ArrowLeft, Users, BarChart3, UserCheck, Edit3, X } from "lucide-react";
+import { Share2, ArrowLeft, Users, BarChart3, UserCheck, Edit3, X, TrendingUp } from "lucide-react";
 import type { SantaCeia, Categoria } from "@/types/santa-ceia";
 import { CATEGORIA_LABELS, CATEGORIA_ORDER, formatarData, gerarRelatorioTexto } from "@/types/santa-ceia";
 import { useSantaCeiaStore } from "@/hooks/use-santa-ceia-store";
@@ -14,6 +15,25 @@ export function ReportView({ ceia, onVoltar }: ReportViewProps) {
   const { atualizarOficiantes, atualizarContagemRodada } = useSantaCeiaStore();
   const [showEditModal, setShowEditModal] = useState(false);
   const [showRoundModal, setShowRoundModal] = useState(false);
+
+  const roundProgressionData = useMemo(() => {
+    const maxRounds = Math.max(
+      ceia.categorias.irmaos.rodadas.length,
+      ceia.categorias.irmas.rodadas.length,
+      ceia.categorias.enfermos.rodadas.length
+    );
+    return Array.from({ length: maxRounds }, (_, i) => {
+      const roundNum = i + 1;
+      return {
+        name: `R ${roundNum}`,
+        "Irmãos": ceia.categorias.irmaos.rodadas[i]?.contagem || 0,
+        "Irmãs": ceia.categorias.irmas.rodadas[i]?.contagem || 0,
+        "Enfermos": ceia.categorias.enfermos.rodadas[i]?.contagem || 0,
+      };
+    });
+  }, [ceia]);
+
+  const hasMultipleRounds = roundProgressionData.length > 0;
 
   const [selectedCat, setSelectedCat] = useState<Categoria | null>(null);
   const [selectedRoundId, setSelectedRoundId] = useState("");
@@ -162,6 +182,112 @@ export function ReportView({ ceia, onVoltar }: ReportViewProps) {
             </div>
           </div>
         </div>
+
+        {/* Round Progression Area Chart */}
+        {hasMultipleRounds && (
+          <div className="card-surface p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
+              <p className="label-caps">Fluxo de Rodadas</p>
+            </div>
+            <div className="w-full h-[220px] pr-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={roundProgressionData}
+                  margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorIrmaos" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorIrmas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorEnfermos" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#d97706" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#d97706" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(156, 163, 175, 0.1)" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    stroke="currentColor"
+                    className="text-[10px] font-semibold text-muted-foreground"
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="currentColor"
+                    className="text-[10px] font-semibold text-muted-foreground"
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="p-3 bg-card/95 border border-border/50 backdrop-blur-md rounded-2xl shadow-xl space-y-1.5 z-50">
+                            <p className="text-xs font-bold text-foreground mb-1">{label}</p>
+                            {payload.map((p: any) => (
+                              <div key={p.name} className="flex items-center gap-4 text-xs font-medium">
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full"
+                                  style={{ backgroundColor: p.color }}
+                                />
+                                <span className="text-muted-foreground">{p.name}:</span>
+                                <span className="font-bold text-foreground ml-auto tabular-nums">{p.value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Irmãos"
+                    stroke="#0ea5e9"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorIrmaos)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Irmãs"
+                    stroke="#f43f5e"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorIrmas)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Enfermos"
+                    stroke="#d97706"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorEnfermos)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Custom chart legend */}
+            <div className="flex justify-center gap-4 mt-3 flex-wrap">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#0ea5e9]" /> Irmãos
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#f43f5e]" /> Irmãs
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#d97706]" /> Enfermos
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Bar Chart */}
         <div className="card-surface p-5">
