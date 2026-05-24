@@ -32,6 +32,7 @@ import { useNavigate } from "react-router-dom";
 import { useSantaCeiaStore } from "@/hooks/use-santa-ceia-store";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { useAccessibilityStore } from "@/hooks/use-accessibility-store";
+import { Logo } from "@/components/Logo";
 
 const CHIP_BY_CAT: Record<string, string> = {
   enfermos: "bg-amber-400/20 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
@@ -116,7 +117,9 @@ export function Dashboard() {
       {/* Header */}
       <header className="px-5 pt-8 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center text-xl" aria-hidden>🍷</div>
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center" aria-hidden>
+            <Logo size={32} />
+          </div>
           <div>
             <h1 className="text-2xl font-extrabold text-foreground font-display tracking-tight leading-none">Santa Ceia</h1>
             <p className="text-xs text-muted-foreground mt-1">Contador oficial</p>
@@ -351,8 +354,8 @@ export function Dashboard() {
       <div className="flex-1 overflow-y-auto px-4 pb-32">
         {historico.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-12 text-center px-6">
-            <div className="w-24 h-24 rounded-[2rem] bg-primary/10 flex items-center justify-center text-5xl mb-6 shadow-inner">
-              🍷
+            <div className="w-24 h-24 rounded-[2rem] bg-primary/5 dark:bg-primary/10 flex items-center justify-center mb-6 shadow-inner">
+              <Logo size={64} />
             </div>
             <h2 className="text-xl font-extrabold text-foreground font-display">Bem-vindo</h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-[260px] leading-relaxed">
