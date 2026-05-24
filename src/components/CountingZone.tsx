@@ -97,8 +97,22 @@ export function CountingZone({ count, onIncrement, onDecrement, onHaptic }: Coun
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.1 }}
       role="button"
-      aria-label={`Contador. Total atual: ${count}. Toque para somar, segure para subtrair.`}
+      aria-label="Área de toque do contador. Toque para somar, segure para subtrair."
     >
+      {/* Floating Minus Button (Instant Subtraction) */}
+      <button
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => {
+          e.stopPropagation();
+          onDecrement();
+          onHaptic?.("decrement");
+        }}
+        className="absolute bottom-4 left-4 w-14 h-14 rounded-full bg-destructive/10 border border-destructive/20 active:bg-destructive/25 text-destructive flex items-center justify-center shadow-lg transition-colors z-20"
+        aria-label="Subtrair 1"
+      >
+        <Minus className="w-6 h-6" strokeWidth={3} />
+      </button>
+
       {/* Ripples */}
       {ripples.map((r) => (
         <span
@@ -128,8 +142,8 @@ export function CountingZone({ count, onIncrement, onDecrement, onHaptic }: Coun
         ))}
       </AnimatePresence>
 
-      {/* Counter — centered in available space */}
-      <div className="flex-1 flex items-center justify-center min-h-0">
+      {/* Counter — centered in available space with aria-live for a11y announcement */}
+      <div className="flex-1 flex items-center justify-center min-h-0" aria-live="polite">
         <AnimatePresence mode="popLayout">
           <motion.div
             key={count}

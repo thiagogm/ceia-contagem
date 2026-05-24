@@ -45,6 +45,7 @@ interface SantaCeiaContextType {
   limparCeiaAtual: () => void;
   excluirCeia: (id: string) => void;
   atualizarOficiantes: (id: string, of: Partial<import("@/types/santa-ceia").Oficiantes>) => void;
+  atualizarContagemRodada: (ceiaId: string, categoria: Categoria, rodadaId: string, novaContagem: number) => void;
 }
 
 const SantaCeiaContext = createContext<SantaCeiaContextType | null>(null);
@@ -140,6 +141,33 @@ export function SantaCeiaProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const atualizarContagemRodada = useCallback((ceiaId: string, categoria: Categoria, rodadaId: string, novaContagem: number) => {
+    setHistorico((h) =>
+      h.map((ceia) => {
+        if (ceia.id === ceiaId) {
+          const catData = ceia.categorias[categoria];
+          const novasRodadas = catData.rodadas.map((r) => {
+            if (r.id === rodadaId) {
+              return { ...r, contagem: novaContagem };
+            }
+            return r;
+          });
+          const novoTotal = novasRodadas.reduce((s, r) => s + r.contagem, 0);
+
+          const novasCategorias = {
+            ...ceia.categorias,
+            [categoria]: { rodadas: novasRodadas, total: novoTotal },
+          };
+
+          const totalGeral = Object.values(novasCategorias).reduce((s, c) => s + c.total, 0);
+
+          return { ...ceia, categorias: novasCategorias, totalGeral };
+        }
+        return ceia;
+      })
+    );
+  }, []);
+
   const value = {
     historico,
     ceiaAtual,
@@ -150,6 +178,7 @@ export function SantaCeiaProvider({ children }: { children: React.ReactNode }) {
     limparCeiaAtual,
     excluirCeia,
     atualizarOficiantes,
+    atualizarContagemRodada,
   };
 
   return (

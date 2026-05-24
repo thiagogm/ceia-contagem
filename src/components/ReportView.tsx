@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Share2, ArrowLeft, Users, BarChart3, UserCheck, Edit3, X } from "lucide-react";
-import type { SantaCeia } from "@/types/santa-ceia";
+import type { SantaCeia, Categoria } from "@/types/santa-ceia";
 import { CATEGORIA_LABELS, CATEGORIA_ORDER, formatarData, gerarRelatorioTexto } from "@/types/santa-ceia";
 import { useSantaCeiaStore } from "@/hooks/use-santa-ceia-store";
 
@@ -11,8 +11,30 @@ interface ReportViewProps {
 }
 
 export function ReportView({ ceia, onVoltar }: ReportViewProps) {
-  const { atualizarOficiantes } = useSantaCeiaStore();
+  const { atualizarOficiantes, atualizarContagemRodada } = useSantaCeiaStore();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showRoundModal, setShowRoundModal] = useState(false);
+
+  const [selectedCat, setSelectedCat] = useState<Categoria | null>(null);
+  const [selectedRoundId, setSelectedRoundId] = useState("");
+  const [selectedRoundNum, setSelectedRoundNum] = useState(0);
+  const [roundCountValue, setRoundCountValue] = useState("");
+
+  const handleEditRoundClick = (cat: Categoria, roundId: string, roundNum: number, currentCount: number) => {
+    setSelectedCat(cat);
+    setSelectedRoundId(roundId);
+    setSelectedRoundNum(roundNum);
+    setRoundCountValue(currentCount.toString());
+    setShowRoundModal(true);
+  };
+
+  const handleSaveRoundCount = () => {
+    if (!selectedCat) return;
+    const newCount = parseInt(roundCountValue.trim(), 10);
+    if (isNaN(newCount) || newCount < 0) return;
+    atualizarContagemRodada(ceia.id, selectedCat, selectedRoundId, newCount);
+    setShowRoundModal(false);
+  };
 
   // Local state for oficiantes textareas
   const [anciaesText, setAnciaesText] = useState("");
@@ -184,9 +206,18 @@ export function ReportView({ ceia, onVoltar }: ReportViewProps) {
               </div>
               <div className="space-y-2">
                 {catData.rodadas.map((r) => (
-                  <div key={r.id} className="flex justify-between text-sm py-1.5 border-b border-border last:border-0">
+                  <div key={r.id} className="flex items-center justify-between text-sm py-1.5 border-b border-border last:border-0">
                     <span className="text-muted-foreground">Rodada {r.numero}</span>
-                    <span className="font-semibold tabular-nums text-foreground">{r.contagem}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold tabular-nums text-foreground">{r.contagem}</span>
+                      <button
+                        onClick={() => handleEditRoundClick(cat, r.id, r.numero, r.contagem)}
+                        className="p-1 rounded-md text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-colors"
+                        aria-label={`Editar contagem da rodada ${r.numero}`}
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -353,6 +384,65 @@ export function ReportView({ ceia, onVoltar }: ReportViewProps) {
                   className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/30"
                 >
                   Salvar Informações
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Round Modal */}
+      <AnimatePresence>
+        {showRoundModal && selectedCat && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[15dvh] bg-background/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowRoundModal(false)}
+          >
+            <motion.div
+              className="w-full max-w-sm bg-card p-6 flex flex-col shadow-2xl space-y-4 rounded-3xl border border-border/40"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between flex-shrink-0">
+                <div>
+                  <h2 className="text-xl font-extrabold text-foreground font-display">Editar Rodada</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {CATEGORIA_LABELS[selectedCat]} — Rodada #{selectedRoundNum}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowRoundModal(false)}
+                  className="p-1.5 rounded-xl bg-surface-active text-muted-foreground flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div>
+                <label className="label-caps block mb-2 text-xs">Quantidade de Participantes</label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={roundCountValue}
+                  onChange={(e) => setRoundCountValue(e.target.value)}
+                  className="w-full bg-accent rounded-xl px-4 py-3 text-2xl font-bold text-center text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex-shrink-0 pt-2">
+                <button
+                  onClick={handleSaveRoundCount}
+                  className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/30"
+                >
+                  Confirmar Alteração
                 </button>
               </div>
             </motion.div>
